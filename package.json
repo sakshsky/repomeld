@@ -1,0 +1,32 @@
+{
+  "name": "repomeld",
+  "version": "1.0.0",
+  "description": "Meld your entire repo into a single file — perfect for AI context, code reviews & sharing",
+  "main": "bin/cli.js",
+  "bin": {
+    "repomeld": "bin/cli.js"
+  },
+  "scripts": {
+    "start": "node bin/cli.js"
+  },
+  "keywords": [
+    "cli",
+    "repo",
+    "file",
+    "combiner",
+    "merge",
+    "concat",
+    "ai-context",
+    "code-review",
+    "repomeld"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.0.0",
+    "repomeld": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
