@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>repomeld — Merge your codebase for AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080B0F;
+  --surface:#0D1117;
+  --raised:#131920;
+  --border:#1E2A36;
+  --border-hi:#2A3F52;
+  --green:#00FF85;
+  --green-dim:rgba(0,255,133,0.1);
+  --green-brd:rgba(0,255,133,0.2);
+  --green-soft:#00D96E;
+  --amber:#F5A623;
+  --blue:#4DA3FF;
+  --text:#D4E0EC;
+  --muted:#5E7A93;
+  --dim:#2A3A4A;
+  --mono:'Fragment Mono',monospace;
+  --serif:'Instrument Serif',Georgia,serif;
+  --sans:'Geist','Helvetica Neue',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
+::selection{background:rgba(0,255,133,0.2);color:#fff}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--green-soft);border-radius:2px}
+
+/* ── SCANLINE OVERLAY ── */
+body::after{
+  content:'';position:fixed;inset:0;z-index:999;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.015) 2px,rgba(0,0,0,0.015) 4px);
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:1rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(8,11,15,0.85);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  transition:all 0.3s;
+}
+.nav-brand{
+  display:flex;align-items:center;gap:0.6rem;text-decoration:none;
+}
+.nav-logo-box{
+  width:28px;height:28px;background:var(--green);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.nav-logo-box::before{
+  content:'>';font-family:var(--mono);font-size:0.75rem;color:#000;font-weight:bold;
+}
+.brand-name{font-family:var(--mono);font-size:0.9rem;color:#fff;letter-spacing:-0.02em}
+.brand-name span{color:var(--green)}
+.nav-right{display:flex;align-items:center;gap:0.75rem}
+.nav-npm{
+  font-family:var(--mono);font-size:0.7rem;color:var(--muted);
+  border:1px solid var(--border);border-radius:4px;padding:0.3rem 0.7rem;
+  text-decoration:none;transition:all 0.2s;
+}
+.nav-npm:hover{border-color:var(--green-brd);color:var(--green)}
+.nav-install{
+  font-family:var(--mono);font-size:0.7rem;background:var(--green);color:#000;
+  border:none;border-radius:4px;padding:0.35rem 0.85rem;cursor:pointer;
+  font-weight:500;transition:all 0.2s;text-decoration:none;
+}
+.nav-install:hover{background:#00FF99;transform:translateY(-1px)}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  padding:7rem 2rem 4rem;
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;overflow:hidden;
+  max-width:680px;margin:0 auto;
+}
+
+/* Background grid */
+.hero::before{
+  content:'';position:absolute;inset:0;z-index:0;
+  background-image:
+    linear-gradient(rgba(0,255,133,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,133,0.04) 1px, transparent 1px);
+  background-size:32px 32px;
+  mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 20%,transparent 80%);
+}
+
+/* Glow blob */
+.hero-glow{
+  position:absolute;width:500px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,255,133,0.07) 0%,transparent 65%);
+  top:-100px;right:-150px;pointer-events:none;z-index:0;
+  animation:glowDrift 10s ease-in-out infinite alternate;
+}
+@keyframes glowDrift{from{transform:translate(0,0)}to{transform:translate(-30px,40px)}}
+
+.hero-inner{position:relative;z-index:1}
+
+/* Terminal badge */
+.terminal-badge{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:var(--green-dim);border:1px solid var(--green-brd);
+  border-radius:4px;padding:0.3rem 0.75rem;margin-bottom:2rem;
+  font-family:var(--mono);font-size:0.72rem;color:var(--green);
+  animation:fadein 0.6s 0.1s ease both;
+}
+.tbadge-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(1.3)}}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Hero headline */
+.hero-h1{
+  font-family:var(--serif);font-style:italic;
+  font-size:3.6rem;line-height:1.08;letter-spacing:-0.02em;
+  color:#fff;margin-bottom:1.5rem;
+}
+.hero-h1 .line{display:block;overflow:hidden}
+.hero-h1 .line span{display:block;animation:lineUp 0.9s cubic-bezier(0.22,1,0.36,1) both}
+.hero-h1 .line:nth-child(1) span{animation-delay:0.15s}
+.hero-h1 .line:nth-child(2) span{animation-delay:0.28s}
+.hero-h1 .line:nth-child(3) span{animation-delay:0.41s}
+@keyframes lineUp{from{transform:translateY(110%)}to{transform:translateY(0)}}
+.hero-h1 .accent{color:var(--green);font-style:normal;font-family:var(--mono);font-size:0.85em;letter-spacing:-0.03em}
+
+.hero-sub{
+  font-family:var(--sans);font-size:1rem;font-weight:300;
+  color:var(--muted);line-height:1.8;max-width:480px;
+  margin-bottom:2.5rem;
+  animation:fadein 0.8s 0.6s ease both;
+}
+.hero-sub strong{color:var(--text);font-weight:500}
+
+/* Hero terminal block */
+.hero-terminal{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;margin-bottom:2rem;
+  animation:fadein 0.8s 0.75s ease both;
+}
+.term-bar{
+  background:var(--raised);padding:0.6rem 1rem;
+  display:flex;align-items:center;gap:0.5rem;
+  border-bottom:1px solid var(--border);
+}
+.term-dot{width:10px;height:10px;border-radius:50%}
+.term-dot:nth-child(1){background:#FF5F56}
+.term-dot:nth-child(2){background:#FFBD2E}
+.term-dot:nth-child(3){background:#27C93F}
+.term-title{font-family:var(--mono);font-size:0.65rem;color:var(--muted);margin-left:auto;letter-spacing:0.05em}
+.term-body{padding:1.25rem 1.25rem 1.4rem;font-family:var(--mono);font-size:0.8rem;line-height:1.9}
+.tline{display:block}
+.tline .prompt{color:var(--green)}
+.tline .cmd{color:#fff}
+.tline .comment{color:var(--muted);font-size:0.72rem}
+.tline .out{color:var(--muted);padding-left:1rem;font-size:0.75rem}
+.tline .success{color:var(--green)}
+.tline .file{color:var(--amber)}
+.tline .info{color:var(--blue)}
+
+.hero-ctas{
+  display:flex;gap:0.75rem;flex-wrap:wrap;
+  animation:fadein 0.8s 0.95s ease both;
+}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:var(--green);color:#000;border:none;border-radius:6px;
+  padding:0.8rem 1.5rem;font-family:var(--mono);font-weight:500;font-size:0.8rem;
+  cursor:pointer;text-decoration:none;letter-spacing:0.01em;
+  transition:all 0.2s;position:relative;overflow:hidden;
+}
+.btn-primary:hover{background:#00FF99;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,255,133,0.25)}
+.btn-secondary{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:transparent;border:1px solid var(--border-hi);color:var(--muted);
+  border-radius:6px;padding:0.8rem 1.5rem;font-family:var(--mono);font-size:0.8rem;
+  cursor:pointer;text-decoration:none;transition:all 0.2s;
+}
+.btn-secondary:hover{border-color:var(--green-brd);color:var(--green)}
+
+/* Hero stats */
+.hero-stats{
+  display:flex;gap:2.5rem;margin-top:3rem;padding-top:2rem;
+  border-top:1px solid var(--border);
+  animation:fadein 0.8s 1.1s ease both;
+}
+.hstat-val{font-family:var(--mono);font-size:1.5rem;color:var(--green);line-height:1}
+.hstat-label{font-family:var(--sans);font-size:0.72rem;color:var(--muted);margin-top:0.3rem;letter-spacing:0.04em}
+
+/* ── SHARED ── */
+.section{padding:5rem 2rem;max-width:680px;margin:0 auto}
+.section-label{
+  font-family:var(--mono);font-size:0.68rem;color:var(--green);
+  letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.8rem;
+  display:flex;align-items:center;gap:0.6rem;
+}
+.section-label::before{content:'#';color:var(--dim)}
+.section-h2{
+  font-family:var(--serif);font-style:italic;
+  font-size:2.4rem;line-height:1.1;letter-spacing:-0.02em;
+  color:#fff;margin-bottom:0.6rem;
+}
+.section-h2 strong{font-style:normal;color:var(--green);font-family:var(--mono);font-size:0.85em}
+.section-lead{
+  font-family:var(--sans);font-size:0.9rem;color:var(--muted);
+  line-height:1.8;margin-bottom:2.5rem;font-weight:300;
+}
+
+/* Divider */
+.divider{max-width:680px;margin:0 auto;border:none;border-top:1px solid var(--border)}
+
+/* ── HOW IT WORKS ── */
+.steps-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.steps-grid{display:flex;flex-direction:column;gap:0}
+.step-row{
+  display:grid;grid-template-columns:40px 1fr;gap:1.2rem;
+  padding:1.5rem 0;border-bottom:1px solid var(--border);align-items:start;
+}
+.step-row:last-child{border-bottom:none}
+.step-n{
+  font-family:var(--mono);font-size:0.65rem;color:var(--green);
+  background:var(--green-dim);border:1px solid var(--green-brd);
+  width:28px;height:28px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;
+}
+.step-title{font-family:var(--mono);font-size:0.88rem;color:#fff;margin-bottom:0.3rem}
+.step-desc{font-family:var(--sans);font-size:0.82rem;color:var(--muted);line-height:1.7;font-weight:300}
+
+/* Install block */
+.install-block{
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  overflow:hidden;margin-bottom:2rem;
+}
+.install-bar{
+  background:var(--raised);padding:0.5rem 1rem;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.install-lang{font-family:var(--mono);font-size:0.62rem;color:var(--muted);letter-spacing:0.08em}
+.copy-btn{
+  font-family:var(--mono);font-size:0.62rem;color:var(--muted);
+  background:none;border:1px solid var(--border);border-radius:3px;
+  padding:0.15rem 0.5rem;cursor:pointer;transition:all 0.2s;letter-spacing:0.06em;
+}
+.copy-btn:hover{border-color:var(--green-brd);color:var(--green)}
+.copy-btn.copied{color:var(--green);border-color:var(--green-brd)}
+.install-code{
+  padding:1.1rem 1.25rem;font-family:var(--mono);font-size:0.8rem;
+  line-height:1.8;color:var(--text);
+}
+.ic-comment{color:var(--muted);font-size:0.72rem}
+.ic-prompt{color:var(--green)}
+.ic-cmd{color:#fff}
+.ic-flag{color:var(--blue)}
+.ic-val{color:var(--amber)}
+.ic-out{color:var(--muted);font-size:0.75rem;padding-left:0.5rem}
+.ic-success{color:var(--green)}
+
+/* ── FEATURES ── */
+.features-grid{display:flex;flex-direction:column;gap:0.75rem}
+.feat{
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.2rem 1.25rem;display:flex;align-items:flex-start;gap:1rem;
+  transition:all 0.25s;cursor:default;
+}
+.feat:hover{border-color:var(--green-brd);background:var(--raised)}
+.feat-icon{
+  width:34px;height:34px;border-radius:6px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:0.95rem;
+  background:var(--green-dim);border:1px solid var(--green-brd);
+}
+.feat-title{font-family:var(--mono);font-size:0.82rem;color:#fff;margin-bottom:0.25rem}
+.feat-desc{font-family:var(--sans);font-size:0.8rem;color:var(--muted);line-height:1.65;font-weight:300}
+.feat-tag{
+  display:inline-block;margin-top:0.5rem;
+  font-family:var(--mono);font-size:0.62rem;color:var(--green);
+  background:var(--green-dim);border:1px solid var(--green-brd);
+  border-radius:3px;padding:0.15rem 0.45rem;
+}
+
+/* ── EXAMPLES ── */
+.examples-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.example-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);overflow-x:auto}
+.etab{
+  font-family:var(--mono);font-size:0.7rem;color:var(--muted);
+  padding:0.6rem 1rem;cursor:pointer;border-bottom:2px solid transparent;
+  white-space:nowrap;transition:all 0.2s;flex-shrink:0;
+  background:none;border-left:none;border-right:none;border-top:none;
+}
+.etab.active{color:var(--green);border-bottom-color:var(--green)}
+.etab:hover{color:var(--text)}
+.example-panes{padding:1.25rem}
+.epane{display:none;font-family:var(--mono);font-size:0.78rem;line-height:1.85}
+.epane.active{display:block}
+.ep-comment{color:var(--muted);font-size:0.72rem}
+.ep-prompt{color:var(--green)}
+.ep-flag{color:var(--blue)}
+.ep-val{color:var(--amber)}
+.ep-out{color:var(--muted);font-size:0.72rem;padding-left:1rem}
+.ep-success{color:var(--green)}
+
+/* ── WHO IT'S FOR ── */
+.audience-list{display:flex;flex-direction:column;gap:0.6rem}
+.aud-item{
+  display:flex;align-items:flex-start;gap:0.9rem;
+  padding:1rem 1.1rem;
+  background:var(--surface);border:1px solid var(--border);border-radius:7px;
+  transition:border-color 0.2s;
+}
+.aud-item:hover{border-color:var(--green-brd)}
+.aud-icon{font-size:1.15rem;flex-shrink:0;margin-top:1px}
+.aud-title{font-family:var(--mono);font-size:0.82rem;color:#fff;margin-bottom:0.2rem}
+.aud-desc{font-family:var(--sans);font-size:0.78rem;color:var(--muted);line-height:1.6;font-weight:300}
+
+/* ── AUTHOR CTA ── */
+.author-section{background:var(--raised);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.author-card{
+  max-width:680px;margin:0 auto;padding:4rem 2rem;
+  display:flex;flex-direction:column;align-items:flex-start;gap:1.5rem;
+  position:relative;overflow:hidden;
+}
+.author-card::before{
+  content:'';position:absolute;right:-100px;top:-100px;
+  width:350px;height:350px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,255,133,0.05),transparent 70%);
+  pointer-events:none;
+}
+.author-label{
+  font-family:var(--mono);font-size:0.65rem;color:var(--green);
+  letter-spacing:0.15em;text-transform:uppercase;
+}
+.author-text{
+  font-family:var(--serif);font-style:italic;
+  font-size:1.6rem;line-height:1.4;letter-spacing:-0.01em;
+  color:#fff;max-width:400px;
+}
+.author-text strong{font-style:normal;color:var(--green)}
+.author-meta{display:flex;flex-direction:column;gap:0.4rem}
+.author-name{font-family:var(--mono);font-size:0.85rem;color:#fff}
+.author-email{
+  font-family:var(--mono);font-size:0.8rem;color:var(--green);
+  text-decoration:none;border-bottom:1px solid var(--green-brd);
+  padding-bottom:1px;transition:border-color 0.2s;
+}
+.author-email:hover{border-color:var(--green)}
+.author-open{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:var(--green-dim);border:1px solid var(--green-brd);
+  color:var(--green);border-radius:4px;padding:0.4rem 0.9rem;
+  font-family:var(--mono);font-size:0.7rem;letter-spacing:0.05em;
+}
+.author-ctas{display:flex;gap:0.75rem;flex-wrap:wrap}
+
+/* ── FOOTER ── */
+footer{
+  max-width:680px;margin:0 auto;padding:2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid var(--border);
+}
+.foot-brand{font-family:var(--mono);font-size:0.8rem;color:var(--muted);text-decoration:none}
+.foot-brand span{color:var(--green)}
+.foot-links{display:flex;gap:1.25rem}
+.foot-link{font-family:var(--mono);font-size:0.68rem;color:var(--muted);text-decoration:none;transition:color 0.2s}
+.foot-link:hover{color:var(--green)}
+
+/* ── SCROLL REVEAL ── */
+.rv{opacity:0;transform:translateY(20px);transition:opacity 0.65s ease,transform 0.65s ease}
+.rv.in{opacity:1;transform:none}
+.rv:nth-child(2){transition-delay:0.08s}
+.rv:nth-child(3){transition-delay:0.16s}
+.rv:nth-child(4){transition-delay:0.24s}
+.rv:nth-child(5){transition-delay:0.32s}
+.rv:nth-child(6){transition-delay:0.40s}
+
+/* ── CURSOR TYPING ── */
+.cursor{display:inline-block;width:2px;height:0.85em;background:var(--green);margin-left:1px;vertical-align:middle;animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-brand">
+    <div class="nav-logo-box"></div>
+    <span class="brand-name"><span>repo</span>meld</span>
+  </a>
+  <div class="nav-right">
+    <a href="https://www.npmjs.com/package/repomeld" target="_blank" class="nav-npm">npm ↗</a>
+    <a href="#install" class="nav-install">Install</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="terminal-badge"><span class="tbadge-dot"></span>npm install -g repomeld</div>
+    <h1 class="hero-h1">
+      <span class="line"><span>Your whole codebase.</span></span>
+      <span class="line"><span>One file.</span></span>
+      <span class="line"><span><span class="accent">AI-ready.</span></span></span>
+    </h1>
+    <p class="hero-sub">
+      Tired of copy-pasting dozens of files when talking to AI?
+      <strong>repomeld</strong> scans your project, skips all the noise, and merges everything into
+      <strong>one clean, readable file</strong> — in seconds.
+    </p>
+
+    <div class="hero-terminal">
+      <div class="term-bar">
+        <div class="term-dot"></div><div class="term-dot"></div><div class="term-dot"></div>
+        <span class="term-title">bash — your-project</span>
+      </div>
+      <div class="term-body">
+        <span class="tline"><span class="prompt">$ </span><span class="cmd">npm install -g repomeld</span></span>
+        <span class="tline out">added 1 package in 0.8s</span>
+        <span class="tline">&nbsp;</span>
+        <span class="tline"><span class="prompt">$ </span><span class="cmd">repomeld --style markdown</span></span>
+        <span class="tline out">Scanning project...</span>
+        <span class="tline out">Skipping: node_modules, .git, dist, .env</span>
+        <span class="tline out">Found <span style="color:var(--amber)">47 files</span> across <span style="color:var(--amber)">12 directories</span></span>
+        <span class="tline">&nbsp;</span>
+        <span class="tline success">✔ Written to <span class="file">repomeld_output.md</span></span>
+        <span class="tline info">  Ready to paste into ChatGPT, Claude, or Cursor<span class="cursor"></span></span>
+      </div>
+    </div>
+
+    <div class="hero-ctas">
+      <a href="#install" class="btn-primary">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Get Started
+      </a>
+      <a href="https://www.npmjs.com/package/repomeld" target="_blank" class="btn-secondary">View on npm ↗</a>
+    </div>
+
+    <div class="hero-stats">
+      <div>
+        <div class="hstat-val">1 cmd</div>
+        <div class="hstat-label">To merge everything</div>
+      </div>
+      <div>
+        <div class="hstat-val">0</div>
+        <div class="hstat-label">Config needed</div>
+      </div>
+      <div>
+        <div class="hstat-val">∞</div>
+        <div class="hstat-label">Files supported</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="steps-section">
+  <div class="section">
+    <p class="section-label rv">How it works</p>
+    <h2 class="section-h2 rv">Three steps.<br><strong>Done.</strong></h2>
+    <div class="steps-grid">
+      <div class="step-row rv">
+        <div class="step-n">01</div>
+        <div><div class="step-title">Install globally</div><p class="step-desc"><code style="font-family:var(--mono);color:var(--green);font-size:0.8rem">npm install -g repomeld</code> — one time, works everywhere.</p></div>
+      </div>
+      <div class="step-row rv">
+        <div class="step-n">02</div>
+        <div><div class="step-title">Run in your project</div><p class="step-desc"><code style="font-family:var(--mono);color:var(--green);font-size:0.8rem">cd your-project && repomeld</code> — that's it. Smart defaults handle the rest.</p></div>
+      </div>
+      <div class="step-row rv">
+        <div class="step-n">03</div>
+        <div><div class="step-title">Paste into your AI</div><p class="step-desc">Open <code style="font-family:var(--mono);color:var(--amber);font-size:0.8rem">repomeld_output.txt</code>, paste into ChatGPT, Claude, Cursor — your entire codebase is now in context.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL -->
+<div id="install" class="section">
+  <p class="section-label rv">Installation</p>
+  <h2 class="section-h2 rv">Start in <strong>30s</strong></h2>
+  <p class="section-lead rv">No config file. No setup. Just install and run.</p>
+
+  <div class="install-block rv">
+    <div class="install-bar">
+      <span class="install-lang">BASH</span>
+      <button class="copy-btn" onclick="copyInstall(this)">copy</button>
+    </div>
+    <div class="install-code">
+      <span class="ic-comment"># Install once</span><br>
+      <span class="ic-prompt">$ </span><span class="ic-cmd">npm install -g repomeld</span><br><br>
+      <span class="ic-comment"># Basic usage</span><br>
+      <span class="ic-prompt">$ </span><span class="ic-cmd">cd your-project</span><br>
+      <span class="ic-prompt">$ </span><span class="ic-cmd">repomeld</span><br><br>
+      <span class="ic-comment"># AI-ready markdown output</span><br>
+      <span class="ic-prompt">$ </span><span class="ic-cmd">repomeld <span class="ic-flag">--style</span> <span class="ic-val">markdown</span> <span class="ic-flag">--output</span> <span class="ic-val">context.md</span></span><br><br>
+      <span class="ic-out">✔ repomeld_output.md written</span>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="steps-section">
+  <div class="section">
+    <p class="section-label rv">Features</p>
+    <h2 class="section-h2 rv">Everything you <strong>need</strong></h2>
+    <p class="section-lead rv">Smart defaults so you're not fighting config. Powerful flags when you need control.</p>
+    <div class="features-grid">
+      <div class="feat rv">
+        <div class="feat-icon">🤖</div>
+        <div>
+          <div class="feat-title">AI-Friendly Mode</div>
+          <p class="feat-desc">Use <code style="font-family:var(--mono);color:var(--amber);font-size:0.76rem">--style markdown</code> to get perfect fenced code blocks for ChatGPT, Claude, Cursor, and any other AI tool.</p>
+          <span class="feat-tag">--style markdown</span>
+        </div>
+      </div>
+      <div class="feat rv">
+        <div class="feat-icon">🔢</div>
+        <div>
+          <div class="feat-title">Auto-numbered Outputs</div>
+          <p class="feat-desc">Outputs like <code style="font-family:var(--mono);color:var(--amber);font-size:0.76rem">repomeld_output__2.txt</code> are created automatically — your old files are never overwritten.</p>
+        </div>
+      </div>
+      <div class="feat rv">
+        <div class="feat-icon">🧹</div>
+        <div>
+          <div class="feat-title">Smart Ignore Defaults</div>
+          <p class="feat-desc">Automatically skips <code style="font-family:var(--mono);color:var(--muted);font-size:0.76rem">node_modules</code>, <code style="font-family:var(--mono);color:var(--muted);font-size:0.76rem">.git</code>, <code style="font-family:var(--mono);color:var(--muted);font-size:0.76rem">dist</code>, <code style="font-family:var(--mono);color:var(--muted);font-size:0.76rem">.env</code>, lock files and other noise. Zero config required.</p>
+        </div>
+      </div>
+      <div class="feat rv">
+        <div class="feat-icon">⚙️</div>
+        <div>
+          <div class="feat-title">Flexible Filtering</div>
+          <p class="feat-desc">Fine-tune with <code style="font-family:var(--mono);color:var(--blue);font-size:0.76rem">--ext</code>, <code style="font-family:var(--mono);color:var(--blue);font-size:0.76rem">--include</code>, <code style="font-family:var(--mono);color:var(--blue);font-size:0.76rem">--exclude</code>, <code style="font-family:var(--mono);color:var(--blue);font-size:0.76rem">--max-size</code> — combine flags freely.</p>
+          <span class="feat-tag">--ext --include --exclude</span>
+        </div>
+      </div>
+      <div class="feat rv">
+        <div class="feat-icon">👁️</div>
+        <div>
+          <div class="feat-title">Dry-run Mode</div>
+          <p class="feat-desc">Preview exactly which files will be included before writing anything. No surprises.</p>
+          <span class="feat-tag">--dry-run</span>
+        </div>
+      </div>
+      <div class="feat rv">
+        <div class="feat-icon">📄</div>
+        <div>
+          <div class="feat-title">Custom Ignore File</div>
+          <p class="feat-desc">Drop a <code style="font-family:var(--mono);color:var(--amber);font-size:0.76rem">repomeld.ignore.json</code> in your project root for persistent per-project rules.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXAMPLES -->
+<div class="examples-section">
+  <div style="max-width:680px;margin:0 auto;padding:3.5rem 2rem 0">
+    <p class="section-label rv">Examples</p>
+    <h2 class="section-h2 rv">Quick <strong>recipes</strong></h2>
+  </div>
+  <div style="max-width:680px;margin:0 auto;padding:1.5rem 2rem 3.5rem">
+    <div class="install-block rv">
+      <div class="install-bar">
+        <div class="example-tabs" style="border:none;gap:0">
+          <button class="etab active" onclick="showTab(0,this)">AI context</button>
+          <button class="etab" onclick="showTab(1,this)">TypeScript only</button>
+          <button class="etab" onclick="showTab(2,this)">Skip tests</button>
+          <button class="etab" onclick="showTab(3,this)">Dry run</button>
+        </div>
+      </div>
+      <div style="padding:1.25rem 1.25rem 1.4rem">
+        <div class="epane active" id="pane0">
+          <span class="ep-comment"># Perfect markdown for AI assistants</span><br>
+          <span class="ep-prompt">$ </span><span>repomeld <span class="ep-flag">--style</span> <span class="ep-val">markdown</span> <span class="ep-flag">--output</span> <span class="ep-val">context.md</span></span><br><br>
+          <span class="ep-out">✔ context.md written (47 files, 12,430 lines)</span><br>
+          <span class="ep-out">→ Paste into ChatGPT / Claude / Cursor</span>
+        </div>
+        <div class="epane" id="pane1">
+          <span class="ep-comment"># Only TypeScript and TSX files</span><br>
+          <span class="ep-prompt">$ </span><span>repomeld <span class="ep-flag">--ext</span> <span class="ep-val">ts tsx</span></span><br><br>
+          <span class="ep-out">✔ repomeld_output.txt written (23 files)</span>
+        </div>
+        <div class="epane" id="pane2">
+          <span class="ep-comment"># Skip test files and keep it under 200kb</span><br>
+          <span class="ep-prompt">$ </span><span>repomeld <span class="ep-flag">--exclude</span> <span class="ep-val">test spec</span> <span class="ep-flag">--max-size</span> <span class="ep-val">200</span></span><br><br>
+          <span class="ep-out">✔ repomeld_output.txt written (31 files)</span>
+        </div>
+        <div class="epane" id="pane3">
+          <span class="ep-comment"># Preview files without writing output</span><br>
+          <span class="ep-prompt">$ </span><span>repomeld <span class="ep-flag">--dry-run</span></span><br><br>
+          <span class="ep-out">Would include: src/index.ts</span><br>
+          <span class="ep-out">Would include: src/utils/helpers.ts</span><br>
+          <span class="ep-out">Would include: README.md</span><br>
+          <span class="ep-out">... 44 more files</span><br><br>
+          <span class="ep-success">Dry run complete. No files written.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WHO IT'S FOR -->
+<div class="section">
+  <p class="section-label rv">Use cases</p>
+  <h2 class="section-h2 rv">Built for <strong>builders</strong></h2>
+  <p class="section-lead rv">If you work with code and AI, repomeld is for you.</p>
+  <div class="audience-list">
+    <div class="aud-item rv">
+      <div class="aud-icon">🧠</div>
+      <div>
+        <div class="aud-title">AI-assisted developers</div>
+        <p class="aud-desc">Stop pasting files one-by-one. Give your AI the full picture — instantly.</p>
+      </div>
+    </div>
+    <div class="aud-item rv">
+      <div class="aud-icon">🔍</div>
+      <div>
+        <div class="aud-title">Code review teams</div>
+        <p class="aud-desc">Share a complete, clean snapshot of any codebase for review in seconds.</p>
+      </div>
+    </div>
+    <div class="aud-item rv">
+      <div class="aud-icon">💼</div>
+      <div>
+        <div class="aud-title">Freelancers</div>
+        <p class="aud-desc">Hand off full project context to clients or collaborators without zipping a folder.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTHOR CTA -->
+<div class="author-section">
+  <div class="author-card">
+    <span class="author-label">Built by a human</span>
+    <p class="author-text">Got a project? I'm <strong>Susheel</strong> — open to freelance and full-time opportunities.</p>
+    <div class="author-meta">
+      <span class="author-name">Susheel</span>
+      <a href="mailto:susheelhbti@gmail.com" class="author-email">susheelhbti@gmail.com</a>
+    </div>
+    <div class="author-ctas">
+      <a href="mailto:susheelhbti@gmail.com" class="btn-primary">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Reach Out
+      </a>
+      <a href="https://www.npmjs.com/package/repomeld" target="_blank" class="btn-secondary">View on npm ↗</a>
+    </div>
+    <span class="author-open">🟢 Open to opportunities</span>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="foot-brand"><span>repo</span>meld</a>
+  <div class="foot-links">
+    <a href="https://www.npmjs.com/package/repomeld" target="_blank" class="foot-link">npm</a>
+    <a href="mailto:susheelhbti@gmail.com" class="foot-link">contact</a>
+  </div>
+</footer>
+
+<script>
+// Tabs
+function showTab(i, btn) {
+  document.querySelectorAll('.epane').forEach((p,j)=>p.classList.toggle('active',j===i));
+  document.querySelectorAll('.etab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+// Copy
+function copyInstall(btn) {
+  const code = `npm install -g repomeld\ncd your-project\nrepomeld --style markdown`;
+  navigator.clipboard.writeText(code).then(()=>{
+    btn.textContent='copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='copy';btn.classList.remove('copied')},2000);
+  });
+}
+// Reveal
+const ro = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ro.unobserve(e.target);}});
+},{threshold:0.08});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+</script>
+</body>
+</html>
