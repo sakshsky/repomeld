@@ -3,374 +3,308 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>repomeld ✦ Merge codebase for AI — One file, instant context</title>
-  <!-- Fonts, Tailwind, jQuery, GSAP for advanced animations -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>repomeld ✦ Master your AI context — Full tutorial + toolkit</title>
+  <!-- Google Fonts + Tailwind + jQuery + GSAP -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <style>
-    /* custom SCSS-inspired deep theme + extra polish */
+    /* custom design system + SCSS-inspired */
     :root {
-      --bg-void: #010409;
-      --bg-deep: #0A0F1A;
-      --bg-card: #0F1624;
-      --border-slate: #1E293B;
-      --neon-green: #00F593;
-      --neon-glow: rgba(0, 245, 147, 0.4);
-      --neon-dim: rgba(0, 245, 147, 0.08);
-      --text-bright: #F0F6FF;
-      --text-dim: #8A99B4;
-      --accent-cyan: #2DD4BF;
-      --accent-purple: #C084FC;
+      --bg-deep: #01050B;
+      --bg-elevated: #0C111D;
+      --card-bg: #0F1624CC;
+      --neon-green: #00FFAA;
+      --neon-blue: #3B82F6;
+      --border-dim: #1E2A3A;
+      --text-muted: #8695AA;
     }
     body {
       font-family: 'Inter', sans-serif;
-      background-color: var(--bg-void);
-      color: var(--text-bright);
+      background: var(--bg-deep);
+      color: #EDF2F8;
       overflow-x: hidden;
     }
     /* custom scroll */
-    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: #0A0F1A; }
-    ::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius: 10px; }
-
-    /* animated noise + grain */
-    .grain-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 5;
-      opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      background-repeat: repeat;
-      mix-blend-mode: overlay;
-    }
-    /* modern glass morphism */
-    .glass-premium {
-      background: rgba(15, 22, 36, 0.55);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(0, 245, 147, 0.2);
+    ::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius: 6px; }
+    .glass-card {
+      background: rgba(15, 22, 36, 0.65);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 255, 170, 0.2);
       border-radius: 28px;
-      transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      transition: all 0.25s;
     }
-    .glass-premium:hover {
+    .glass-card:hover {
       border-color: var(--neon-green);
-      box-shadow: 0 0 20px rgba(0, 245, 147, 0.2);
-      background: rgba(20, 28, 45, 0.75);
+      box-shadow: 0 8px 28px rgba(0, 255, 170, 0.15);
     }
-    .terminal-modern {
-      background: #03060C;
-      border-radius: 24px;
-      border: 1px solid #1E2A3A;
-      box-shadow: 0 20px 35px -12px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,245,147,0.1);
+    .terminal-window {
+      background: #080C16;
+      border-radius: 20px;
+      border: 1px solid #1F2A3E;
+      overflow: hidden;
     }
     .code-font {
       font-family: 'JetBrains Mono', monospace;
     }
-    .btn-neon {
-      background: linear-gradient(105deg, #00F593 0%, #00C97E 100%);
-      color: #010409;
+    .btn-primary-neon {
+      background: linear-gradient(100deg, #00FFAA 0%, #00D98F 100%);
+      color: #01050B;
       font-weight: 600;
-      box-shadow: 0 0 12px rgba(0,245,147,0.3);
-      transition: all 0.25s;
+      transition: 0.2s;
+      box-shadow: 0 2px 12px rgba(0,255,170,0.3);
     }
-    .btn-neon:hover {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 0 28px rgba(0,245,147,0.6);
+    .btn-primary-neon:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(0,255,170,0.4);
     }
     .badge-glow {
-      background: rgba(0, 245, 147, 0.12);
-      border: 1px solid rgba(0, 245, 147, 0.35);
+      background: rgba(0, 255, 170, 0.1);
+      border: 1px solid rgba(0, 255, 170, 0.35);
       border-radius: 40px;
       padding: 0.3rem 1rem;
       font-size: 0.7rem;
       font-family: 'JetBrains Mono', monospace;
-      color: #00F593;
-      backdrop-filter: blur(4px);
     }
-    .feature-icon-box {
-      background: linear-gradient(135deg, rgba(0,245,147,0.12) 0%, rgba(45,212,191,0.05) 100%);
-      border-radius: 18px;
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.6rem;
+    .tutorial-step {
+      transition: all 0.2s;
+      cursor: pointer;
     }
-    /* animated underline */
-    .animated-underline {
-      position: relative;
+    .tutorial-step.active {
+      background: rgba(0, 255, 170, 0.1);
+      border-left: 3px solid var(--neon-green);
+      box-shadow: 0 2px 12px rgba(0,255,170,0.1);
     }
-    .animated-underline:after {
-      content: '';
-      position: absolute;
-      width: 0;
-      height: 2px;
-      bottom: -4px;
-      left: 0;
+    .cursor-blink {
+      display: inline-block;
+      width: 2px;
+      height: 1rem;
       background: var(--neon-green);
-      transition: width 0.3s ease;
+      margin-left: 3px;
+      vertical-align: middle;
+      animation: blinkStep 1s step-end infinite;
     }
-    .animated-underline:hover:after {
-      width: 100%;
-    }
-    /* reveal + parallax */
+    @keyframes blinkStep { 0%,100%{ opacity:1; } 50%{ opacity:0; } }
     .reveal-up {
       opacity: 0;
-      transform: translateY(35px);
-      transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.8s ease;
+      transform: translateY(30px);
+      transition: opacity 0.8s cubic-bezier(0.2,0.9,0.3,1), transform 0.8s ease;
     }
     .reveal-up.visible {
       opacity: 1;
       transform: translateY(0);
     }
-    .cursor-blink-live {
-      display: inline-block;
-      width: 2px;
-      height: 1.1rem;
-      background-color: #00F593;
-      margin-left: 4px;
-      vertical-align: middle;
-      animation: blinkStep 1s step-end infinite;
-    }
-    @keyframes blinkStep {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    /* floating orbs */
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(70px);
-      z-index: 0;
-      pointer-events: none;
+    /* gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #00FFAA, #2DD4BF);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
   </style>
 </head>
-<body class="antialiased">
+<body>
 
-  <!-- background depth elements -->
-  <div class="grain-overlay"></div>
-  <div class="orb w-[600px] h-[600px] bg-[#00F593]/10 -top-48 -right-48 animate-pulse" style="animation-duration: 12s;"></div>
-  <div class="orb w-[500px] h-[500px] bg-[#2DD4BF]/10 bottom-0 left-0" style="animation: floatGlow 18s infinite alternate;"></div>
-  <style>@keyframes floatGlow { 0% { transform: translate(0,0) scale(1); opacity: 0.4; } 100% { transform: translate(-50px, 50px) scale(1.3); opacity: 0.7; } }</style>
+  <!-- Background ambient -->
+  <div class="fixed inset-0 pointer-events-none z-0 opacity-30">
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-[#00FFAA] rounded-full blur-[100px] opacity-10 animate-pulse"></div>
+    <div class="absolute bottom-1/3 right-0 w-80 h-80 bg-[#3B82F6] rounded-full blur-[100px] opacity-10"></div>
+  </div>
 
-  <!-- Navigation (glass, dynamic) -->
-  <nav class="fixed top-0 left-0 w-full z-50 py-4 px-6 md:px-12 transition-all duration-300" style="background: rgba(1,4,9,0.75); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,245,147,0.2);">
+  <!-- Navigation -->
+  <nav class="fixed top-0 w-full z-50 py-4 px-6 md:px-12 bg-[#01050B]/80 backdrop-blur-xl border-b border-[#1E2A3A]">
     <div class="max-w-7xl mx-auto flex justify-between items-center">
       <a href="#" class="flex items-center gap-2 group">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#00F593] to-[#2DD4BF] flex items-center justify-center shadow-lg group-hover:scale-105 transition"><span class="text-black font-mono font-bold text-base">&gt;_</span></div>
-        <span class="font-mono text-xl font-bold tracking-tight"><span class="text-[#00F593]">repo</span>meld</span>
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00FFAA] to-[#2DD4BF] flex items-center justify-center shadow-md"><span class="text-black font-mono font-bold text-base">&gt;_</span></div>
+        <span class="font-mono text-xl font-bold tracking-tight"><span class="text-[#00FFAA]">repo</span>meld</span>
       </a>
-      <div class="flex gap-5 items-center">
-        <a href="https://www.npmjs.com/package/repomeld" target="_blank" class="hidden md:inline-flex code-font text-xs text-[#8A99B4] border border-[#1E2A3A] px-3 py-1.5 rounded-full hover:border-[#00F593] hover:text-[#00F593] transition-all">npm registry ↗</a>
-        <a href="#install" class="btn-neon px-4 py-2 rounded-full text-sm font-mono font-semibold">Install</a>
+      <div class="flex gap-4 items-center">
+        <a href="#tutorial" class="hidden md:block text-sm font-mono text-[#A0B3D9] hover:text-[#00FFAA] transition">📘 Tutorial</a>
+        <a href="#install" class="btn-primary-neon px-4 py-2 rounded-full text-sm font-mono font-semibold">Install</a>
       </div>
     </div>
   </nav>
 
   <main class="relative z-10">
-    <!-- Hero Section (improved) -->
-    <section class="pt-36 pb-24 px-6 max-w-7xl mx-auto">
+    <!-- Hero Section (enhanced) -->
+    <section class="pt-32 pb-20 px-6 max-w-7xl mx-auto">
       <div class="grid lg:grid-cols-2 gap-12 items-center">
         <div class="space-y-6">
-          <div class="badge-glow inline-flex items-center gap-2"><span class="w-2 h-2 bg-[#00F593] rounded-full animate-pulse"></span> v1.2.0 — production ready</div>
-          <h1 class="text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight">Your whole<br><span class="bg-gradient-to-r from-[#00F593] to-[#2DD4BF] bg-clip-text text-transparent">codebase.</span><br><span class="text-white/90">One file.</span></h1>
-          <p class="text-[#8A99B4] text-lg max-w-lg leading-relaxed">Stop wasting prompts copying dozens of files. <strong class="text-white">repomeld</strong> merges your entire project into a pristine, AI‑optimized document — ready for ChatGPT, Claude, Cursor, and more.</p>
-          <div class="flex flex-wrap gap-4 pt-2">
-            <a href="#install" class="btn-neon px-6 py-3 rounded-xl font-mono text-sm flex items-center gap-2">✨ Get Started →</a>
-            <a href="https://www.npmjs.com/package/repomeld" class="border border-[#2A3A52] hover:border-[#00F593] text-[#CBD5E1] px-6 py-3 rounded-xl font-mono text-sm transition-all">Documentation</a>
+          <div class="badge-glow inline-flex items-center gap-2"><span class="w-2 h-2 bg-[#00FFAA] rounded-full animate-pulse"></span> new: v2.0 — AI-native merge</div>
+          <h1 class="text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight">Merge your<br><span class="gradient-text">codebase</span><br>for AI in <span class="text-white">seconds</span></h1>
+          <p class="text-[#A0B3D9] text-lg max-w-lg">repomeld transforms your project into one clean, context-rich file. No more copy-paste hell — just <strong class="text-white">instant AI understanding</strong>.</p>
+          <div class="flex gap-4 flex-wrap">
+            <a href="#tutorial" class="btn-primary-neon px-6 py-3 rounded-xl font-mono text-sm">🎓 Watch Tutorial →</a>
+            <a href="#install" class="border border-[#2A3A52] hover:border-[#00FFAA] px-6 py-3 rounded-xl font-mono text-sm transition">⚡ Quick start</a>
           </div>
-          <div class="flex gap-8 pt-8 border-t border-[#1E2A3A]">
-            <div><div class="text-3xl font-mono text-[#00F593]">~0ms</div><div class="text-xs text-[#5B6E8C]">overhead</div></div>
-            <div><div class="text-3xl font-mono text-[#00F593]">50+</div><div class="text-xs text-[#5B6E8C]">file types</div></div>
-            <div><div class="text-3xl font-mono text-[#00F593]">1 cmd</div><div class="text-xs text-[#5B6E8C]">zero config</div></div>
-          </div>
+          <div class="flex gap-6 pt-4"><div><span class="text-2xl font-mono text-[#00FFAA]">∞</span><p class="text-xs">any stack</p></div><div><span class="text-2xl font-mono text-[#00FFAA]">~0</span><p class="text-xs">config fatigue</p></div><div><span class="text-2xl font-mono text-[#00FFAA]">1</span><p class="text-xs">file to rule them all</p></div></div>
         </div>
-        <!-- Interactive terminal (improved with jQuery typing) -->
-        <div class="terminal-modern overflow-hidden shadow-2xl" id="heroTerminal">
-          <div class="bg-[#0B1018] px-5 py-3 flex items-center gap-2 border-b border-[#1E2A3A]">
-            <div class="flex gap-1.5"><div class="w-3 h-3 rounded-full bg-[#FF5F56]"></div><div class="w-3 h-3 rounded-full bg-[#FFBD2E]"></div><div class="w-3 h-3 rounded-full bg-[#27C93F]"></div></div>
-            <span class="text-[#4B5E77] text-[0.6rem] font-mono ml-2">~/projects/awesome-app</span>
-          </div>
-          <div class="p-5 code-font text-sm space-y-1" id="dynamicTerminal">
-            <div><span class="text-[#00F593]">$</span> <span class="text-white">repomeld --style markdown --output context.md</span></div>
-            <div class="text-[#5B6E8C] text-xs">🔍 scanning 124 files...</div>
-            <div class="text-[#5B6E8C] text-xs">✓ ignored node_modules, .git, dist, logs</div>
-            <div><span class="text-[#FBBF24]">📁 47 files · 8,230 lines of code</span></div>
-            <div class="text-[#00F593] flex items-center gap-1 mt-1">✔ merged to context.md <span class="cursor-blink-live"></span></div>
+        <div class="terminal-window shadow-2xl">
+          <div class="bg-[#0B111C] px-4 py-2 flex gap-2 border-b border-[#1E2A3A]"><div class="w-3 h-3 rounded-full bg-[#FF5F56]"></div><div class="w-3 h-3 rounded-full bg-[#FFBD2E]"></div><div class="w-3 h-3 rounded-full bg-[#27C93F]"></div><span class="text-[#5A6E8C] text-[10px] font-mono ml-2">~/project</span></div>
+          <div class="p-5 code-font text-sm space-y-1" id="heroDemoTerminal">
+            <div><span class="text-[#00FFAA]">$</span> repomeld --style markdown --output ai_context.md</div>
+            <div class="text-[#6A7C9F] text-xs">📂 scanning 312 files...</div>
+            <div class="text-[#6A7C9F] text-xs">✅ ignored node_modules, .git, dist, __pycache__</div>
+            <div><span class="text-[#FBBF24]">✨ 89 source files · 14,200 lines</span></div>
+            <div class="text-[#00FFAA] flex items-center gap-1">✔ merged to ai_context.md <span class="cursor-blink"></span></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- How it works (card timeline) -->
-    <section class="px-6 py-24 bg-[#05080F]/60 border-y border-[#1E2A3A]">
-      <div class="max-w-6xl mx-auto text-center">
-        <div class="reveal-up"><span class="text-[#00F593] font-mono text-sm tracking-wider">⚡ WORKFLOW</span><h2 class="text-4xl md:text-5xl font-bold mt-2">Three commands, <span class="text-[#00F593]">infinite productivity</span></h2></div>
-        <div class="grid md:grid-cols-3 gap-8 mt-16">
-          <div class="glass-premium p-7 text-left reveal-up"><div class="w-12 h-12 rounded-xl bg-[#00F593]/20 border border-[#00F593]/40 flex items-center justify-center text-[#00F593] font-mono text-xl font-bold">1</div><h3 class="text-xl font-mono mt-4">Install globally</h3><p class="text-[#8A99B4] text-sm mt-2"><code class="bg-black/40 px-1.5 py-0.5 rounded text-[#00F593] text-xs">npm i -g repomeld</code> — one time, ready anywhere.</p></div>
-          <div class="glass-premium p-7 text-left reveal-up"><div class="w-12 h-12 rounded-xl bg-[#00F593]/20 border border-[#00F593]/40 flex items-center justify-center text-[#00F593] font-mono text-xl font-bold">2</div><h3 class="text-xl font-mono mt-4">Run & merge</h3><p class="text-[#8A99B4] text-sm mt-2"><code class="bg-black/40 px-1.5 py-0.5 rounded text-[#00F593] text-xs">cd project && repomeld</code> — automatic smart defaults.</p></div>
-          <div class="glass-premium p-7 text-left reveal-up"><div class="w-12 h-12 rounded-xl bg-[#00F593]/20 border border-[#00F593]/40 flex items-center justify-center text-[#00F593] font-mono text-xl font-bold">3</div><h3 class="text-xl font-mono mt-4">Paste to AI</h3><p class="text-[#8A99B4] text-sm mt-2">Copy output file → ChatGPT, Claude, Cursor. Instant full context.</p></div>
+    <!-- 📘 COMPLETE TUTORIAL SECTION (Rich Content) -->
+    <section id="tutorial" class="px-6 py-20 bg-[#080C16]/50 border-y border-[#1E2A3A]">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12 reveal-up">
+          <span class="text-[#00FFAA] font-mono text-sm tracking-wider">📘 step-by-step mastery</span>
+          <h2 class="text-4xl md:text-5xl font-bold mt-2">Learn <span class="gradient-text">repomeld</span> in 5 minutes</h2>
+          <p class="text-[#8A99B4] max-w-2xl mx-auto mt-3">From zero to AI-ready project dumps — interactive tutorial that gets you productive instantly.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+          <!-- Tutorial sidebar steps (interactive) -->
+          <div class="glass-card p-5 space-y-2">
+            <h3 class="font-mono text-lg font-semibold mb-3 flex items-center gap-2"><span class="text-[#00FFAA]">#</span> Tutorial steps</h3>
+            <div class="tutorial-step active p-3 rounded-xl transition" data-step="0">
+              <div class="font-mono text-sm font-bold">1️⃣ Installation & first run</div>
+              <p class="text-xs text-[#8A99B4] mt-1">Global setup + sanity check</p>
+            </div>
+            <div class="tutorial-step p-3 rounded-xl transition" data-step="1">
+              <div class="font-mono text-sm font-bold">2️⃣ Basic merge (plain text)</div>
+              <p class="text-xs text-[#8A99B4] mt-1">Understand default output</p>
+            </div>
+            <div class="tutorial-step p-3 rounded-xl transition" data-step="2">
+              <div class="font-mono text-sm font-bold">3️⃣ AI-optimized markdown mode</div>
+              <p class="text-xs text-[#8A99B4] mt-1">Perfect for ChatGPT/Claude</p>
+            </div>
+            <div class="tutorial-step p-3 rounded-xl transition" data-step="3">
+              <div class="font-mono text-sm font-bold">4️⃣ Filtering & ignoring files</div>
+              <p class="text-xs text-[#8A99B4] mt-1">--ext, --exclude, custom ignore</p>
+            </div>
+            <div class="tutorial-step p-3 rounded-xl transition" data-step="4">
+              <div class="font-mono text-sm font-bold">5️⃣ Advanced: dry-run & config</div>
+              <p class="text-xs text-[#8A99B4] mt-1">Preview and project presets</p>
+            </div>
+          </div>
+
+          <!-- Tutorial dynamic content + live terminal demo -->
+          <div class="lg:col-span-2 glass-card p-6">
+            <div id="tutorialTitle" class="text-2xl font-bold font-mono flex items-center gap-2"><span class="text-[#00FFAA]">▶</span> Installation & first run</div>
+            <div id="tutorialContent" class="mt-4 text-[#B9C7DD] space-y-3 leading-relaxed"></div>
+            <div class="mt-6 terminal-window">
+              <div class="bg-[#0B1018] px-4 py-1 text-[10px] font-mono text-[#5A6E8C]">demo terminal — try the command</div>
+              <div class="p-4 code-font text-sm" id="tutorialDemoCode">
+                <!-- dynamic content filled by jquery -->
+              </div>
+            </div>
+            <div class="flex justify-between mt-6">
+              <button id="prevTutorial" class="border border-[#2A3A52] px-4 py-2 rounded-lg text-sm font-mono hover:border-[#00FFAA] transition">← Previous</button>
+              <button id="nextTutorial" class="btn-primary-neon px-5 py-2 rounded-lg text-sm font-mono">Next Step →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bonus tips section -->
+        <div class="mt-16 grid md:grid-cols-3 gap-5">
+          <div class="bg-[#0F1624]/70 rounded-2xl p-5 border border-[#1E2A3A] reveal-up"><div class="text-2xl mb-2">💡</div><h4 class="font-mono font-semibold">Pro tip #1</h4><p class="text-xs text-[#A0B3D9]">Use <code class="bg-black/40 px-1 rounded text-[#00FFAA]">repomeld --dry-run</code> before big merges to see exactly what will be included.</p></div>
+          <div class="bg-[#0F1624]/70 rounded-2xl p-5 border border-[#1E2A3A] reveal-up"><div class="text-2xl mb-2">🚀</div><h4 class="font-mono font-semibold">Pro tip #2</h4><p class="text-xs text-[#A0B3D9]">Create a <code class="bg-black/40 px-1 rounded text-[#00FFAA]">repomeld.ignore.json</code> in root for persistent exclusions across team.</p></div>
+          <div class="bg-[#0F1624]/70 rounded-2xl p-5 border border-[#1E2A3A] reveal-up"><div class="text-2xl mb-2">🧠</div><h4 class="font-mono font-semibold">Pro tip #3</h4><p class="text-xs text-[#A0B3D9]">Combine with <code class="bg-black/40 px-1 rounded text-[#00FFAA]">--max-size 250</code> to keep context under token limits.</p></div>
         </div>
       </div>
     </section>
 
-    <!-- Install block + features (improved grid) -->
-    <section id="install" class="px-6 py-24 max-w-6xl mx-auto">
-      <div class="reveal-up text-center mb-12"><span class="text-[#00F593] font-mono">🚀 GET STARTED</span><h2 class="text-4xl font-bold mt-1">Install in <span class="text-[#00F593]">seconds</span></h2><p class="text-[#8A99B4] max-w-xl mx-auto">Zero dependencies, zero headaches.</p></div>
-      <div class="terminal-modern overflow-hidden reveal-up">
-        <div class="bg-[#0B1018] px-5 py-2 flex justify-between items-center"><span class="code-font text-[10px] text-[#5B6E8C]">bash</span><button id="copyAllBtn" class="code-font text-[10px] text-[#8A99B4] border border-[#2A3A52] px-2 py-0.5 rounded hover:border-[#00F593] transition">copy</button></div>
-        <div class="p-5 code-font text-sm text-[#CBD5E1] space-y-1">
-          <div><span class="text-[#6B7280]"># global install</span></div>
-          <div><span class="text-[#00F593]">$</span> npm install -g repomeld</div>
+    <!-- Install & Feature Grid -->
+    <section id="install" class="px-6 py-20 max-w-6xl mx-auto">
+      <div class="text-center reveal-up"><span class="text-[#00FFAA] font-mono">⚡ one-line setup</span><h2 class="text-4xl font-bold mt-1">Get repomeld <span class="gradient-text">today</span></h2></div>
+      <div class="terminal-window mt-8 reveal-up">
+        <div class="flex justify-between bg-[#0B1018] px-4 py-2"><span class="code-font text-[10px] text-[#7A8AAA]">npm</span><button id="copyGlobalBtn" class="text-[10px] font-mono border border-[#2A3A52] px-2 rounded hover:text-[#00FFAA]">copy</button></div>
+        <div class="p-5 code-font text-sm">
+          <div><span class="text-[#6A7C9F]"># Install globally (one time)</span></div>
+          <div><span class="text-[#00FFAA]">$</span> npm install -g repomeld</div>
           <div class="h-2"></div>
-          <div><span class="text-[#6B7280]"># merge with markdown style (best for AI)</span></div>
-          <div><span class="text-[#00F593]">$</span> repomeld --style markdown --output bundle.md</div>
-          <div class="text-[#00F593] mt-2">✔ bundle.md written · 127 files merged · ready for AI</div>
+          <div><span class="text-[#6A7C9F]"># Merge your project with AI markdown</span></div>
+          <div><span class="text-[#00FFAA]">$</span> repomeld --style markdown --output bundle.md</div>
+          <div class="text-[#00FFAA] text-xs mt-2">✨ bundle.md generated — ready to paste into any LLM</div>
         </div>
       </div>
 
-      <!-- advanced feature matrix -->
-      <div class="mt-24"><div class="text-center reveal-up"><h3 class="text-3xl font-bold">Everything you <span class="text-[#00F593]">need</span>, nothing you don't</h3></div>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
-        <div class="glass-premium p-5 flex gap-4 items-start reveal-up"><div class="feature-icon-box">🧠</div><div><h4 class="font-mono font-semibold">AI-first markdown</h4><p class="text-xs text-[#8A99B4]">--style markdown produces perfect fenced blocks for any LLM.</p></div></div>
-        <div class="glass-premium p-5 flex gap-4 items-start reveal-up"><div class="feature-icon-box">⚡</div><div><h4 class="font-mono font-semibold">Smart ignore defaults</h4><p class="text-xs text-[#8A99B4]">Ignores node_modules, .git, dist, logs, .env, lockfiles.</p></div></div>
-        <div class="glass-premium p-5 flex gap-4 items-start reveal-up"><div class="feature-icon-box">🎛️</div><div><h4 class="font-mono font-semibold">Power filters</h4><p class="text-xs text-[#8A99B4]">--ext, --include, --exclude, --max-size for full control.</p></div></div>
-        <div class="glass-premium p-5 flex gap-4 items-start reveal-up"><div class="feature-icon-box">🔄</div><div><h4 class="font-mono font-semibold">Auto versioning</h4><p class="text-xs text-[#8A99B4]">repomeld_output__2.txt — never overwrite previous exports.</p></div></div>
-        <div class="glass-premium p-5 flex gap-4 items-start reveal-up"><div class="feature-icon-box">👁️</div><div><h4 class="font-mono font-semibold">Dry-run mode</h4><p class="text-xs text-[#8A99B4]">Preview exactly which files are included before writing.</p></div></div>
-        <div class="glass-premium p-5 flex gap-4 items-start reveal-up"><div class="feature-icon-box">📁</div><div><h4 class="font-mono font-semibold">Custom ignore file</h4><p class="text-xs text-[#8A99B4]">repomeld.ignore.json for per-project rules.</p></div></div>
-      </div></div>
-    </section>
-
-    <!-- Examples tab section with jQuery enhanced tabs + gsap -->
-    <section class="px-6 py-20 bg-[#05080F] border-y border-[#1E2A3A]">
-      <div class="max-w-4xl mx-auto">
-        <div class="reveal-up text-center"><span class="text-[#00F593] font-mono">📋 REAL-WORLD RECIPES</span><h2 class="text-4xl font-bold mt-2">Example <span class="text-[#00F593]">playbook</span></h2></div>
-        <div class="mt-12 terminal-modern">
-          <div class="flex flex-wrap gap-2 border-b border-[#1E2A3A] px-4 pt-2">
-            <button data-example="0" class="example-switch px-4 py-2 font-mono text-sm text-[#8A99B4] border-b-2 border-transparent hover:text-[#00F593] transition-all">✨ AI Context</button>
-            <button data-example="1" class="example-switch px-4 py-2 font-mono text-sm text-[#8A99B4] border-b-2 border-transparent hover:text-[#00F593] transition-all">📘 TypeScript only</button>
-            <button data-example="2" class="example-switch px-4 py-2 font-mono text-sm text-[#8A99B4] border-b-2 border-transparent hover:text-[#00F593] transition-all">🧪 Skip tests</button>
-            <button data-example="3" class="example-switch px-4 py-2 font-mono text-sm text-[#8A99B4] border-b-2 border-transparent hover:text-[#00F593] transition-all">🔍 Dry-run preview</button>
-          </div>
-          <div class="p-6 code-font text-sm" id="exampleDynamic">
-            <span class="text-[#6B7280]"># perfect markdown for ChatGPT, Claude, Cursor</span><br>
-            <span class="text-[#00F593]">$</span> repomeld --style markdown --output ai_context.md<br>
-            <span class="text-[#FBBF24]">✔ ai_context.md written (47 files, syntax highlighted)</span><br>
-            <span class="text-[#2DD4BF]">→ paste directly into any AI tool → instant understanding</span>
-          </div>
-        </div>
+      <div class="grid md:grid-cols-2 gap-6 mt-16">
+        <div class="glass-card p-6 reveal-up"><div class="flex gap-3 items-start"><div class="text-3xl">🎯</div><div><h3 class="font-mono font-bold">Smart defaults</h3><p class="text-sm text-[#8A99B4]">Ignores node_modules, .git, .env, dist, logs, lockfiles automatically.</p></div></div></div>
+        <div class="glass-card p-6 reveal-up"><div class="flex gap-3 items-start"><div class="text-3xl">📄</div><div><h3 class="font-mono font-bold">Auto-versioning</h3><p class="text-sm text-[#8A99B4]">Never overwrite: repomeld_output__2.txt, __3.txt, etc.</p></div></div></div>
+        <div class="glass-card p-6 reveal-up"><div class="flex gap-3 items-start"><div class="text-3xl">🔍</div><div><h3 class="font-mono font-bold">Dry-run mode</h3><p class="text-sm text-[#8A99B4]"><code class="bg-black/40 px-1 rounded">--dry-run</code> to preview files without writing.</p></div></div></div>
+        <div class="glass-card p-6 reveal-up"><div class="flex gap-3 items-start"><div class="text-3xl">⚙️</div><div><h3 class="font-mono font-bold">Flexible filters</h3><p class="text-sm text-[#8A99B4]">--ext, --include, --exclude, --max-size for ultimate control.</p></div></div></div>
       </div>
     </section>
 
-    <!-- Use cases + Author callout (modern) -->
-    <section class="px-6 py-24 max-w-6xl mx-auto">
-      <div class="grid lg:grid-cols-2 gap-14 items-center">
-        <div class="reveal-up space-y-5">
-          <span class="text-[#00F593] font-mono text-sm">👥 WHO IS IT FOR</span>
-          <h2 class="text-4xl font-bold">Built for <span class="text-[#00F593]">modern builders</span></h2>
-          <div class="flex gap-4 items-start"><div class="text-2xl">🧠</div><div><strong class="font-mono">AI engineers & developers</strong><p class="text-[#8A99B4] text-sm">Feed entire codebases to AI without tedious copy-paste.</p></div></div>
-          <div class="flex gap-4 items-start"><div class="text-2xl">👥</div><div><strong class="font-mono">Code review & auditors</strong><p class="text-[#8A99B4] text-sm">Share clean snapshots, not zip folders.</p></div></div>
-          <div class="flex gap-4 items-start"><div class="text-2xl">💼</div><div><strong class="font-mono">Freelancers & agencies</strong><p class="text-[#8A99B4] text-sm">Deliver full project context to clients instantly.</p></div></div>
+    <!-- Use cases & author section -->
+    <section class="px-6 py-20 bg-[#080C16] border-y border-[#1E2A3A]">
+      <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+        <div class="reveal-up"><span class="text-[#00FFAA] font-mono text-sm">👥 real‑world impact</span><h2 class="text-4xl font-bold mt-2">Who loves <span class="gradient-text">repomeld</span>?</h2>
+          <div class="space-y-4 mt-6"><div class="flex gap-3"><span class="text-2xl">🤖</span><div><strong class="font-mono">AI Engineers</strong><p class="text-sm text-[#8A99B4]">Provide entire codebase context to LLMs with one paste.</p></div></div>
+          <div class="flex gap-3"><span class="text-2xl">🧪</span><div><strong class="font-mono">QA & auditors</strong><p class="text-sm text-[#8A99B4]">Snapshot reviews without cloning repos.</p></div></div>
+          <div class="flex gap-3"><span class="text-2xl">💼</span><div><strong class="font-mono">Freelancers</strong><p class="text-sm text-[#8A99B4]">Deliver full project understanding to clients in seconds.</p></div></div></div>
         </div>
-        <div class="glass-premium p-8 relative overflow-hidden reveal-up">
-          <div class="absolute -top-20 -right-20 w-52 h-52 bg-[#00F593]/20 rounded-full blur-[70px]"></div>
-          <span class="text-[#00F593] text-xs font-mono bg-[#00F593]/10 px-3 py-1 rounded-full">✨ open for collaboration</span>
-          <p class="text-2xl font-serif italic mt-5 leading-relaxed">“I'm <strong class="text-[#00F593] not-italic">Susheel</strong>, creator of repomeld. Open to freelance & full‑time opportunities — let's build something great.”</p>
-          <div class="mt-6"><a href="mailto:susheelhbti@gmail.com" class="animated-underline text-[#00F593] font-mono text-sm">susheelhbti@gmail.com</a></div>
-          <div class="flex gap-4 mt-6"><a href="mailto:susheelhbti@gmail.com" class="btn-neon px-5 py-2 rounded-xl text-sm font-mono">📬 Hire me</a><a href="https://www.npmjs.com/package/repomeld" target="_blank" class="border border-[#2A3A52] px-5 py-2 rounded-xl text-sm font-mono hover:border-[#00F593] transition">npm package →</a></div>
-        </div>
+        <div class="glass-card p-7 relative overflow-hidden reveal-up"><div class="absolute -top-20 -right-20 w-52 h-52 bg-[#00FFAA]/10 rounded-full blur-[60px]"></div><span class="text-[#00FFAA] text-xs font-mono">✨ open for opportunities</span><p class="text-xl font-serif italic mt-3">"I'm <strong class="text-[#00FFAA]">Susheel</strong>, creator of repomeld. Open to freelance & full‑time roles — let's build AI tooling together."</p><a href="mailto:susheelhbti@gmail.com" class="inline-block mt-4 text-[#00FFAA] font-mono border-b border-[#00FFAA]/40 hover:border-[#00FFAA]">susheelhbti@gmail.com</a><div class="flex gap-3 mt-6"><a href="mailto:susheelhbti@gmail.com" class="btn-primary-neon px-4 py-2 rounded-xl text-sm font-mono">📧 Hire me</a><a href="https://www.npmjs.com/package/repomeld" target="_blank" class="border border-[#2A3A52] px-4 py-2 rounded-xl text-sm font-mono hover:border-[#00FFAA]">npm ↗</a></div></div>
       </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="border-t border-[#1E2A3A] py-10 px-6 text-center text-[#5B6E8C] text-sm font-mono">
-      <div class="max-w-6xl mx-auto flex justify-between flex-wrap gap-3"><span><span class="text-[#00F593]">repo</span>meld — AI-native code merging</span><span>MIT · 2025</span><a href="#" class="hover:text-[#00F593]">↑ back to top</a></div>
-    </footer>
+    <footer class="text-center py-8 text-[#5A6E8C] text-xs font-mono border-t border-[#1E2A3A]"><span class="text-[#00FFAA]">repo</span>meld — merge, understand, ship. MIT 2025</footer>
   </main>
 
   <script>
     $(function() {
       gsap.registerPlugin(ScrollTrigger);
-      
-      // reveal animations with GSAP + ScrollTrigger
       $('.reveal-up').each(function(i, el) {
-        gsap.fromTo(el, 
-          { y: 40, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 85%", toggleActions: "play none none reverse" } }
-        );
+        gsap.fromTo(el, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 85%" } });
       });
 
-      // Hero terminal dynamic typing (jQuery + GSAP)
-      const terminalLines = [
-        { text: "<span class='text-[#00F593]'>$</span> repomeld --style markdown --output context.md", delay: 300 },
-        { text: "<span class='text-[#5B6E8C] text-xs'>🔍 scanning 124 files...</span>", delay: 1200 },
-        { text: "<span class='text-[#5B6E8C] text-xs'>✓ ignored node_modules, .git, dist, .env</span>", delay: 2000 },
-        { text: "<span class='text-[#FBBF24]'>📁 47 files · 8,230 lines of code</span>", delay: 2800 },
-        { text: "<span class='text-[#00F593] flex items-center gap-1'>✔ merged to context.md <span class='cursor-blink-live'></span></span>", delay: 3500 }
+      // Tutorial dataset
+      const tutorialSteps = [
+        { title: "Installation & first run", content: "repomeld is a single global CLI. After installing via npm, run <code class='bg-black/40 px-1 rounded'>repomeld --help</code> to verify. The first merge uses smart defaults: it scans your current directory, respects .gitignore-like rules, and outputs a clean text file.", code: "$ npm install -g repomeld\n$ repomeld --version\n> repomeld/2.0.0\n\n$ cd my-project\n$ repomeld\n✔ repomeld_output.txt written" },
+        { title: "Basic merge (plain text)", content: "Without any flags, repomeld generates a plain text file with filenames and contents. Perfect for simple analysis or legacy tools. The output includes a table of contents and file separators.", code: "$ repomeld\nScanning project...\nSkipping node_modules, .git, dist\nFound 47 files\n✔ repomeld_output.txt (plain text, 312KB)" },
+        { title: "AI-optimized markdown mode", content: "For ChatGPT, Claude, Cursor, or any LLM: use <strong>--style markdown</strong>. This creates beautifully formatted fenced code blocks with language hints, making the AI understand your code structure perfectly.", code: "$ repomeld --style markdown --output ai_context.md\n✨ Markdown with syntax highlighting\n✔ ai_context.md ready — paste into ChatGPT and get instant answers" },
+        { title: "Filtering & ignoring files", content: "Control exactly what gets merged: <code>--ext js ts</code> for specific extensions, <code>--exclude test mock</code> to skip patterns, or <code>--max-size 500</code> to avoid huge files. Combine flags for precision.", code: "$ repomeld --ext py --exclude test migrations --max-size 200\n✔ Only Python files, no tests, under 200KB each.\nOutput: repomeld_output__2.txt" },
+        { title: "Advanced: dry-run & config", content: "Use <code>--dry-run</code> to preview files before merge. For per‑project defaults, create <strong>repomeld.ignore.json</strong> in root with custom rules (extensions, exclude patterns).", code: "$ repomeld --dry-run\nWould include: src/main.py, lib/utils.js ...\nDry run complete (0 files written).\n\n$ cat repomeld.ignore.json\n{ \"exclude\": [\"temp\", \"backup\"] }" }
       ];
-      let lineIndex = 0;
-      const $termContainer = $("#dynamicTerminal");
-      function typeNextLine() {
-        if (lineIndex < terminalLines.length) {
-          const lineData = terminalLines[lineIndex];
-          $termContainer.append(`<div>${lineData.text}</div>`);
-          lineIndex++;
-          setTimeout(typeNextLine, lineData.delay);
-        } else {
-          // keep blinking cursor effect
-          const lastDiv = $termContainer.children().last();
-          if(lastDiv.find('.cursor-blink-live').length === 0) {
-            lastDiv.append('<span class="cursor-blink-live"></span>');
-          }
-        }
-      }
-      $termContainer.empty();
-      typeNextLine();
+      let currentStep = 0;
 
-      // Example tabs with GSAP micro-animation
-      const examplesMap = {
-        0: `<span class='text-[#6B7280]'># Perfect markdown for AI assistants (ChatGPT, Claude, Cursor)</span><br><span class='text-[#00F593]'>$</span> repomeld --style markdown --output ai_context.md<br><span class='text-[#FBBF24]'>✔ ai_context.md written (47 files, fenced code blocks)</span><br><span class='text-[#2DD4BF]'>→ paste into any AI, get full understanding</span>`,
-        1: `<span class='text-[#6B7280]'># Only TypeScript and TSX files</span><br><span class='text-[#00F593]'>$</span> repomeld --ext ts tsx --output types_only.txt<br><span class='text-[#FBBF24]'>✓ 23 TypeScript files merged</span>`,
-        2: `<span class='text-[#6B7280]'># Exclude test & spec files, limit size to 200KB</span><br><span class='text-[#00F593]'>$</span> repomeld --exclude test spec --max-size 200<br><span class='text-[#00F593]'>✔ repomeld_output.txt written (31 files, tests excluded)</span>`,
-        3: `<span class='text-[#6B7280]'># Dry-run preview without writing output</span><br><span class='text-[#00F593]'>$</span> repomeld --dry-run<br><span class='text-[#FBBF24]'>Would include: src/index.ts, components/Button.tsx, utils/api.ts ...</span><br><span class='text-[#00F593]'>Dry run complete. No files written.</span>`
-      };
-      function switchExample(id) {
-        const newHtml = examplesMap[id];
-        if(newHtml) {
-          gsap.to("#exampleDynamic", { opacity: 0, duration: 0.15, onComplete: () => {
-            $("#exampleDynamic").html(newHtml);
-            gsap.to("#exampleDynamic", { opacity: 1, duration: 0.25 });
-          }});
-        }
-        $('.example-switch').each(function(idx, btn) {
-          if($(btn).data('example') == id) {
-            $(btn).addClass('text-[#00F593] border-b-2 border-[#00F593]').removeClass('text-[#8A99B4] border-transparent');
-          } else {
-            $(btn).removeClass('text-[#00F593] border-b-2 border-[#00F593]').addClass('text-[#8A99B4] border-transparent');
-          }
-        });
+      function updateTutorial(step) {
+        const stepData = tutorialSteps[step];
+        $("#tutorialTitle").html(`<span class="text-[#00FFAA]">▶</span> ${stepData.title}`);
+        $("#tutorialContent").html(`<div class="leading-relaxed">${stepData.content}</div>`);
+        $("#tutorialDemoCode").html(`<div class="text-[#B9C7DD] font-mono text-sm whitespace-pre-wrap">${stepData.code.replace(/\n/g,'<br>')}</div>`);
+        $(".tutorial-step").removeClass("active bg-[#00FFAA]/10 border-l-3 border-[#00FFAA]").css("border-left", "0px");
+        $(`.tutorial-step[data-step="${step}"]`).addClass("active").css("border-left", "3px solid #00FFAA").css("background", "rgba(0,255,170,0.05)");
       }
-      $('.example-switch').on('click', function() { let ex = $(this).data('example'); switchExample(ex); });
-      
-      // copy install command
-      $("#copyAllBtn").on("click", function() {
-        const cmd = `npm install -g repomeld\ncd your-project\nrepomeld --style markdown --output context.md`;
-        navigator.clipboard.writeText(cmd).then(() => {
-          const btn = $(this);
-          btn.text("copied!");
-          setTimeout(() => btn.text("copy"), 2000);
-        });
+
+      $(".tutorial-step").on("click", function() { currentStep = parseInt($(this).data("step")); updateTutorial(currentStep); });
+      $("#nextTutorial").on("click", function() { if(currentStep < tutorialSteps.length-1) { currentStep++; updateTutorial(currentStep); } });
+      $("#prevTutorial").on("click", function() { if(currentStep > 0) { currentStep--; updateTutorial(currentStep); } });
+      updateTutorial(0);
+
+      // Copy install command
+      $("#copyGlobalBtn").on("click", function() {
+        const installCmd = `npm install -g repomeld\ncd your-project\nrepomeld --style markdown --output context.md`;
+        navigator.clipboard.writeText(installCmd);
+        const original = $(this).text();
+        $(this).text("copied!").addClass("text-[#00FFAA]");
+        setTimeout(() => { $(this).text("copy").removeClass("text-[#00FFAA]"); }, 2000);
       });
 
-      // smooth scroll
+      // Hero terminal small animation (optional)
+      let heroLines = 0;
+      const $heroTerm = $("#heroDemoTerminal");
+      const initialHtml = $heroTerm.html();
+      setTimeout(() => {
+        // ensure final line blinking
+        if($heroTerm.find('.cursor-blink').length === 0) $heroTerm.append('<div class="text-[#00FFAA] flex items-center gap-1 mt-1">🚀 ready for AI <span class="cursor-blink"></span></div>');
+      }, 500);
+      
+      // smooth anchor
       $("a[href^='#']").on('click', function(e) {
         let target = $(this.getAttribute('href'));
         if(target.length) { e.preventDefault(); $('html, body').animate({ scrollTop: target.offset().top - 70 }, 600); }
